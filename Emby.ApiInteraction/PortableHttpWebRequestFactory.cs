@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Emby.ApiInteraction
@@ -24,12 +25,16 @@ namespace Emby.ApiInteraction
 
         public Task<WebResponse> GetResponseAsync(HttpWebRequest request, int timeoutMs)
         {
+            var tcs = new TaskCompletionSource<WebResponse>();
             if (timeoutMs > 0)
             {
-                return GetResponseAsync(request, TimeSpan.FromMilliseconds(timeoutMs));
-            }
+                var ct = new CancellationTokenSource(timeoutMs);
+                ct.Token.Register(() =>
+                {
+                    tcs.TrySetException(new TimeoutException());
+                }, useSynchronizationContext: false);
 
-            var tcs = new TaskCompletionSource<WebResponse>();
+            }
 
             try
             {
@@ -38,36 +43,47 @@ namespace Emby.ApiInteraction
                     try
                     {
                         var response = (HttpWebResponse)request.EndGetResponse(iar);
-                        tcs.SetResult(response);
+                        if (!tcs.Task.IsCanceled)
+                            tcs.SetResult(response);
                     }
                     catch (Exception exc)
                     {
-                        tcs.SetException(exc);
+                        tcs.TrySetException(exc);
                     }
                 }, null);
             }
             catch (Exception exc)
             {
-                tcs.SetException(exc);
+                tcs.TrySetException(exc);
             }
 
             return tcs.Task;
         }
 
-        private Task<WebResponse> GetResponseAsync(WebRequest request, TimeSpan timeout)
-        {
-            return Task.Factory.StartNew(() =>
-            {
-                var t = Task.Factory.FromAsync<WebResponse>(
-                    request.BeginGetResponse,
-                    request.EndGetResponse,
-                    null);
+        //private Task<WebResponse> GetResponseAsync(WebRequest request, TimeSpan timeout)
+        //{
+        //    return Task.Factory.StartNew(() =>
+        //    {
+        //        var t = Task.Factory.FromAsync(
+        //            request.BeginGetResponse,
+        //            request.EndGetResponse,
+        //            null);
 
-                if (!t.Wait(timeout)) throw new TimeoutException();
+        //        try
+        //        {
+        //            if (!t.Wait(timeout))
+        //            {
+        //                throw new TimeoutException();
+        //            }
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            throw e.InnerException ?? e;
+        //        }
 
-                return t.Result;
-            });
-        }
+        //        return t.Result;
+        //    });
+        //}
 
         public Task<Stream> GetRequestStreamAsync(HttpWebRequest request)
         {
