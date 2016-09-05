@@ -713,11 +713,8 @@ namespace Emby.ApiInteraction
             {
                 throw;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                //Ugly hack, but this is the error we get when connecting to Localhost without loopback excemption 
-                if (ex.Message?.StartsWith("An error occurred while sending the request.") == true)
-                    throw new InvalidOperationException();
                 // Already logged at a lower level
                 return null;
             }
