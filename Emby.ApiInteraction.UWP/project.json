@@ -1,6 +1,6 @@
 ﻿{
   "dependencies": {
-    "MediaBrowser.Common": "3.0.658",
+    "MediaBrowser.Common": "3.0.659",
     "Microsoft.NETCore.UniversalWindowsPlatform": "5.2.2",
     "Newtonsoft.Json": "9.0.1"
   },
