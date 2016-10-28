@@ -711,7 +711,7 @@ namespace Emby.ApiInteraction
             }
             catch (OperationCanceledException)
             {
-                throw;
+                return null;
             }
             catch (Exception)
             {
