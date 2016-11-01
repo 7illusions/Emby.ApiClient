@@ -57,7 +57,7 @@ namespace Emby.ApiInteraction.Playback
         /// <param name="isOffline">if set to <c>true</c> [is offline].</param>
         /// <param name="apiClient">The API client.</param>
         /// <returns>Task&lt;StreamInfo&gt;.</returns>
-        Task<StreamInfo> GetVideoStreamInfo(string serverId, VideoOptions options, bool isOffline, IApiClient apiClient);
+        Task<StreamInfo> GetVideoStreamInfo(string serverId, VideoOptions options, bool isOffline, bool forceLiveTvDirectStream, IApiClient apiClient);
 
         /// <summary>
         /// Changes the video stream.
