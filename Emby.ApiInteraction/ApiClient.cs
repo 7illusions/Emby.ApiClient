@@ -29,6 +29,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -318,7 +319,7 @@ namespace Emby.ApiInteraction
             });
         }
 
-
+        
         public Task<HttpResponse> GetResponse(string url, CancellationToken cancellationToken = default(CancellationToken))
         {
             return HttpClient.GetResponse(new HttpRequest

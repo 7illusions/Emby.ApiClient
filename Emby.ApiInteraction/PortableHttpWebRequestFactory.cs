@@ -42,7 +42,7 @@ namespace Emby.ApiInteraction
                 {
                     try
                     {
-                        var response = (HttpWebResponse)request.EndGetResponse(iar);
+                        var response = (HttpWebResponse)request.EndGetResponse(iar);                        
                         if (!tcs.Task.IsCanceled)
                             tcs.SetResult(response);
                     }
@@ -87,29 +87,7 @@ namespace Emby.ApiInteraction
 
         public Task<Stream> GetRequestStreamAsync(HttpWebRequest request)
         {
-            var tcs = new TaskCompletionSource<Stream>();
-
-            try
-            {
-                request.BeginGetRequestStream(iar =>
-                {
-                    try
-                    {
-                        var response = request.EndGetRequestStream(iar);
-                        tcs.SetResult(response);
-                    }
-                    catch (Exception exc)
-                    {
-                        tcs.SetException(exc);
-                    }
-                }, null);
-            }
-            catch (Exception exc)
-            {
-                tcs.SetException(exc);
-            }
-
-            return tcs.Task;
+            return request.GetRequestStreamAsync();
         }
     }
 }

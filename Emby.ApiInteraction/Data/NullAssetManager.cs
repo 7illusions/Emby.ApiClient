@@ -167,5 +167,20 @@ namespace Emby.ApiInteraction.Data
         {
             return Task.FromResult<UserDto>(null);
         }
+
+        public Task SaveImage(string itemId, string imageId, Stream stream)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> HasImage(string itemId, string imageId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Stream> GetImage(string itemId, string imageId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

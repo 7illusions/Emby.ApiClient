@@ -184,6 +184,7 @@ namespace Emby.ApiInteraction.Data
         /// <param name="stream">The stream.</param>
         /// <returns>Task.</returns>
         Task SaveImage(string serverId, string itemId, string imageId, Stream stream);
+        Task SaveImage(string itemId, string imageId, Stream stream);
         /// <summary>
         /// Determines whether the specified server identifier has image.
         /// </summary>
@@ -191,6 +192,7 @@ namespace Emby.ApiInteraction.Data
         /// <param name="itemId">The item identifier.</param>
         /// <param name="imageId">The image identifier.</param>
         Task<bool> HasImage(string serverId, string itemId, string imageId);
+        Task<bool> HasImage(string itemId, string imageId);
         /// <summary>
         /// Gets the image.
         /// </summary>
@@ -199,6 +201,7 @@ namespace Emby.ApiInteraction.Data
         /// <param name="imageId">The image identifier.</param>
         /// <returns>Task&lt;Stream&gt;.</returns>
         Task<Stream> GetImage(string serverId, string itemId, string imageId);
+        Task<Stream> GetImage(string itemId, string imageId);
         /// <summary>
         /// Determines whether the specified item has image.
         /// </summary>

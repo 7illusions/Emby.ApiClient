@@ -933,11 +933,7 @@ namespace Emby.ApiInteraction
             if (ConnectUser != null)
             {
                 ConnectUser = null;
-
-                if (ConnectUserSignOut != null)
-                {
-                    ConnectUserSignOut(this, EventArgs.Empty);
-                }
+                ConnectUserSignOut?.Invoke(this, EventArgs.Empty);
             }
         }
 

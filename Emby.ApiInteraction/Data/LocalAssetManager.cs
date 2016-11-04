@@ -367,17 +367,32 @@ namespace Emby.ApiInteraction.Data
 
         public Task SaveImage(string serverId, string itemId, string imageId, Stream stream)
         {
-            return _imageRepository.SaveImage(GetImageRepositoryId(serverId, itemId), imageId, stream);
+            return SaveImage(GetImageRepositoryId(serverId, itemId), imageId, stream);
+        }
+
+        public Task SaveImage(string itemId, string imageId, Stream stream)
+        {
+            return _imageRepository.SaveImage(itemId, imageId, stream);
         }
 
         public Task<bool> HasImage(string serverId, string itemId, string imageId)
         {
-            return _imageRepository.HasImage(GetImageRepositoryId(serverId, itemId), imageId);
+            return HasImage(GetImageRepositoryId(serverId, itemId), imageId);
+        }
+
+        public Task<bool> HasImage(string itemId, string imageId)
+        {
+            return _imageRepository.HasImage(itemId, imageId);
         }
 
         public Task<Stream> GetImage(string serverId, string itemId, string imageId)
         {
-            return _imageRepository.GetImage(GetImageRepositoryId(serverId, itemId), imageId);
+            return GetImage(GetImageRepositoryId(serverId, itemId), imageId);
+        }
+
+        public Task<Stream> GetImage(string itemId, string imageId)
+        {
+            return _imageRepository.GetImage(itemId, imageId);
         }
 
         private string GetImageRepositoryId(string serverId, string itemId)

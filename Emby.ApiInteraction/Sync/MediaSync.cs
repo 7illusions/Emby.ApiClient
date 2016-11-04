@@ -5,6 +5,7 @@ using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Logging;
 using MediaBrowser.Model.Sync;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -104,8 +105,7 @@ namespace Emby.ApiInteraction.Sync
             IProgress<double> progress,
             CancellationToken cancellationToken)
         {
-            var libraryItem = jobItem.Item;
-
+            var libraryItem = jobItem.Item;            
             var localItem = _localAssetManager.CreateLocalItem(libraryItem, server, jobItem.SyncJobItemId, jobItem.OriginalFileName);
 
             // Create db record
@@ -121,6 +121,9 @@ namespace Emby.ApiInteraction.Sync
             // Download images
             await GetItemImages(apiClient, localItem, cancellationToken).ConfigureAwait(false);
             progress.Report(95);
+
+            //Download additional data
+            await DownloadAdditionalData(apiClient, localItem, cancellationToken);
 
             // Download subtitles
             await GetItemSubtitles(apiClient, jobItem, localItem, cancellationToken).ConfigureAwait(false);
@@ -164,6 +167,57 @@ namespace Emby.ApiInteraction.Sync
             {
                 await DownloadImage(apiClient, item.ServerId, libraryItem.AlbumId, libraryItem.AlbumPrimaryImageTag, ImageType.Primary, cancellationToken)
                         .ConfigureAwait(false);
+            }            
+        }
+
+        private async Task DownloadAdditionalData(IApiClient apiClient, LocalItem item, CancellationToken cancellationToken)
+        {
+            var thickItem = await apiClient.GetItemAsync(item.Item.Id, apiClient.CurrentUserId).ConfigureAwait(false);
+            item.Item.OfficialRating = thickItem.OfficialRating;
+            item.Item.Studios = thickItem.Studios;
+            item.Item.IsHD = thickItem.IsHD;
+            item.Item.ParentIndexNumber = thickItem.ParentIndexNumber;
+            item.Item.IndexNumber = thickItem.IndexNumber;
+
+            item.Item.BackdropImageTags = thickItem.BackdropImageTags;
+            item.Item.ParentBackdropImageTags = thickItem.ParentBackdropImageTags;
+            item.Item.ParentBackdropItemId = thickItem.ParentBackdropItemId;
+            await _localAssetManager.AddOrUpdate(item).ConfigureAwait(false);
+
+            string backdropItemId;
+            List<string> backdropImageTags;
+
+            if (thickItem.BackdropCount == 0)
+            {
+                backdropItemId = thickItem.ParentBackdropItemId;
+                backdropImageTags = thickItem.ParentBackdropImageTags;
+            }
+            else
+            {
+                backdropItemId = thickItem.Id;
+                backdropImageTags = thickItem.BackdropImageTags;
+            }
+
+            for (var i = 0; i < backdropImageTags.Count; i++)
+            {
+                var hasImage = await _localAssetManager.HasImage(backdropItemId, backdropImageTags[i]).ConfigureAwait(false);
+
+                if (hasImage)
+                {
+                    continue;
+                }
+
+                var url = apiClient.GetImageUrl(backdropItemId, new ImageOptions
+                {
+                    ImageType = ImageType.Backdrop,
+                    Tag = backdropImageTags[i],
+                    ImageIndex = i
+                });
+
+                using (var response = await apiClient.GetResponse(url, cancellationToken).ConfigureAwait(false))
+                {                    
+                    await _localAssetManager.SaveImage(backdropItemId, backdropImageTags[i], response.Content).ConfigureAwait(false);
+                }           
             }
         }
 
@@ -335,5 +389,7 @@ namespace Emby.ApiInteraction.Sync
 
             await _localAssetManager.DeleteFile(localPath).ConfigureAwait(false);
         }
+
+      
     }
 }
