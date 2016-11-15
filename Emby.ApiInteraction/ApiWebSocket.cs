@@ -331,7 +331,11 @@ namespace Emby.ApiInteraction
         /// <param name="state">The state.</param>
         private async void TimerCallback(object state)
         {
-            await EnsureConnectionAsync(CancellationToken.None).ConfigureAwait(false);
+            try
+            {
+                await EnsureConnectionAsync(CancellationToken.None).ConfigureAwait(false);
+            }
+           catch { }
         }
 
         protected override void Dispose(bool disposing)

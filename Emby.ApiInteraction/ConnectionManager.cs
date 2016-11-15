@@ -96,7 +96,11 @@ namespace Emby.ApiInteraction
 
         async void Device_ResumeFromSleep(object sender, EventArgs e)
         {
-            await WakeAllServers(CancellationToken.None).ConfigureAwait(false);
+            try
+            {
+                await WakeAllServers(CancellationToken.None).ConfigureAwait(false);
+            }
+            catch { }
         }
 
         private IApiClient GetOrAddApiClient(ServerInfo server, ConnectionMode connectionMode)
